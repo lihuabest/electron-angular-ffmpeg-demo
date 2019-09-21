@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "declaration": true,
+        "outDir": "./dist-serve",
+        "rootDir": "serve"
+    },
+    "include": [
+        "serve/**/*.ts"
+    ],
+    "exclude": [
+        "./node_modules"
+    ]
+}
