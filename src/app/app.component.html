@@ -1,6 +1,9 @@
 <div class="container">
     <div>
         <button (click)="connectClick()">通信</button>
+        <button (click)="closeClick()">关闭通信</button>
     </div>
-    <video id="videoElement"></video>
+    <video id="videoElement" style="display: none"></video>
+    <img id="img" style="width: 100px;height: 100px;display: none;">
+    <canvas id="streamCanvas" width="720" height="480"></canvas>
 </div>

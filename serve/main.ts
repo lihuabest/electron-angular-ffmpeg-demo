@@ -44,15 +44,13 @@ function createWindow() {
     });
 
     // 页面通信
-    ipcMain.on('play', (event, message) => {
-        server.play({
-            channelUrl: message
-        });
+    // ipcMain.on('play', (event, message) => {
+    //     server.play({
+    //         channelUrl: message
+    //     });
 
-        win.webContents.send('playOver', 'copy play: ' + message);
-    });
-
-
+    //     win.webContents.send('playOver', 'copy play: ' + message);
+    // });
 }
 
 app.on('ready', createWindow);

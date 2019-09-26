@@ -39,11 +39,11 @@ function createWindow() {
         win = null;
     });
     // 页面通信
-    ipcMain.on('play', function (event, message) {
-        server.play({
-            channelUrl: message
-        });
-        win.webContents.send('playOver', 'copy play: ' + message);
-    });
+    // ipcMain.on('play', (event, message) => {
+    //     server.play({
+    //         channelUrl: message
+    //     });
+    //     win.webContents.send('playOver', 'copy play: ' + message);
+    // });
 }
 app.on('ready', createWindow);

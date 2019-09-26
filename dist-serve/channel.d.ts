@@ -1,3 +1,4 @@
+import * as Ffmpeg from 'fluent-ffmpeg';
 import * as SocketIO from 'socket.io';
 export declare class ChannelConfig {
     channelId: string;
@@ -7,8 +8,19 @@ export declare class ChannelConfig {
 export declare class Channel {
     freeTime: number;
     config: ChannelConfig;
-    isStreamWrap: boolean;
-    io: SocketIO.Server;
-    constructor(config: ChannelConfig, io: SocketIO.Server);
+    sockets: SocketIO.Socket[];
+    ffmpeg: Ffmpeg.FfmpegCommand;
+    constructor(config: ChannelConfig);
     startStreamWrap(): void;
+    startStreamWrap2(): void;
+    /**
+     * 添加socket
+     * @param socket
+     */
+    addSocket(socket: SocketIO.Socket): void;
+    /**
+     * 移除socket
+     * @param socket
+     */
+    removeSocket(socket: SocketIO.Socket): void;
 }
