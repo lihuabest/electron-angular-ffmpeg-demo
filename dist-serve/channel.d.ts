@@ -10,6 +10,7 @@ export declare class Channel {
     config: ChannelConfig;
     sockets: SocketIO.Socket[];
     ffmpeg: Ffmpeg.FfmpegCommand;
+    mp4frag: any;
     constructor(config: ChannelConfig);
     startStreamWrap(): void;
     startStreamWrap2(): void;
@@ -23,4 +24,9 @@ export declare class Channel {
      * @param socket
      */
     removeSocket(socket: SocketIO.Socket): void;
+    startStreamWrap3(): void;
+    /**
+     * 获取mp4frag
+     */
+    getMp4frag(): any;
 }

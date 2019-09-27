@@ -3,6 +3,8 @@
 import * as Ffmpeg from 'fluent-ffmpeg';
 import * as SocketIO from 'socket.io';
 import * as fs from 'fs';
+const { spawn } = require('child_process');
+const Mp4Frag = require('mp4frag');
 
 export class ChannelConfig {
     public channelId: string;
@@ -15,6 +17,7 @@ export class Channel {
     public config: ChannelConfig;
     public sockets: SocketIO.Socket[] = [];
     public ffmpeg: Ffmpeg.FfmpegCommand;
+    public mp4frag = new Mp4Frag({bufferListSize: 3});
 
     public constructor(config: ChannelConfig) {
         this.config = config;
@@ -180,5 +183,30 @@ export class Channel {
             this.ffmpeg && this.ffmpeg.kill('SIGKILL');
             this.ffmpeg = null;
         }
+    }
+
+    startStreamWrap3() {
+        // -loglevel info quiet debug 日志等级
+        const ffmpeg = spawn(
+            'ffmpeg',
+            ['-loglevel', 'debug', '-stimeout', '30000000', '-probesize', '64', '-analyzeduration', '100000', '-reorder_queue_size', '5', '-rtsp_transport', 'tcp', '-i', this.config.channelUrl, '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 216.4.116.29"', '-reset_timestamps', '1', 'pipe:1'],
+            // {stdio: ['ignore', 'pipe', 'pipe'], cwd: process.cwd()}
+            {stdio: ['ignore', 'pipe', 'pipe'], cwd: process.cwd()}
+        );
+
+        // 注册错误
+        ffmpeg.stderr.on('data', data => {
+            const error = data.toString();
+            console.log('ffmpeg stderr: ', error);
+        });
+
+        ffmpeg.stdio[1].pipe(this.mp4frag);
+    }
+
+    /**
+     * 获取mp4frag
+     */
+    getMp4frag() {
+        return this.mp4frag;
     }
 }

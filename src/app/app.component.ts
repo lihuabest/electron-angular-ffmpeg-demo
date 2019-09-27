@@ -13,10 +13,10 @@ declare var flvjs;
 export class AppComponent {
     url: string;
     socket: any;
+    flvPlayer: any;
 
     constructor(private electronService: ElectronService) {
         this.electronService.ipcRenderer.on('playOver', (e, message) => {
-            console.log(message);
             this.initVideo();
         });
     }
@@ -31,8 +31,7 @@ export class AppComponent {
             streamCtx.drawImage(img, 0, 0, 720, 480);
         };
 
-        // this.electronService.ipcRenderer.send('play', 'rtsp://admin:admin@192.168.0.233:554/h264/ch1/main/av_stream');
-        this.socket = io('http://localhost:3000');
+        this.socket = io('http://localhost:3000/socket');
 
         this.socket.on('connect', () => {
             this.socket.emit('msg', {
@@ -62,17 +61,27 @@ export class AppComponent {
         this.socket = null;
     }
 
+    connectMp4fragClick() {
+        // this.electronService.ipcRenderer.send('play', 'rtsp://admin:admin@192.168.0.233:554/h264/ch1/main/av_stream');
+        this.electronService.ipcRenderer.send('play', 'rtsp://192.168.31.51:554/stream=0');
+    }
+
+    closeMp4fragClick() {
+        this.flvPlayer && this.flvPlayer.destroy();
+        this.flvPlayer = null;
+    }
+
     initVideo() {
         if (flvjs.isSupported()) {
             const videoElement = document.getElementById('videoElement');
-            const flvPlayer = flvjs.createPlayer({
-                type: 'flv',
+            this.flvPlayer = flvjs.createPlayer({
+                type: 'mp4',
                 isLive: true,
-                url: 'ws://localhost:3000/rtsp.out'
+                url: 'http://localhost:3000/mp4frag.mp4'
             });
-            flvPlayer.attachMediaElement(videoElement);
-            flvPlayer.load();
-            flvPlayer.play();
+            this.flvPlayer.attachMediaElement(videoElement);
+            this.flvPlayer.load();
+            this.flvPlayer.play();
         }
     }
 }

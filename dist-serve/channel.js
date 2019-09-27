@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // const ffmpeg = require('fluent-ffmpeg');
 var Ffmpeg = require("fluent-ffmpeg");
 var fs = require("fs");
+var spawn = require('child_process').spawn;
+var Mp4Frag = require('mp4frag');
 var ChannelConfig = /** @class */ (function () {
     function ChannelConfig() {
     }
@@ -13,6 +15,7 @@ var Channel = /** @class */ (function () {
     function Channel(config) {
         this.freeTime = 0;
         this.sockets = [];
+        this.mp4frag = new Mp4Frag({ bufferListSize: 3 });
         this.config = config;
     }
     Channel.prototype.startStreamWrap = function () {
@@ -163,6 +166,24 @@ var Channel = /** @class */ (function () {
             this.ffmpeg && this.ffmpeg.kill('SIGKILL');
             this.ffmpeg = null;
         }
+    };
+    Channel.prototype.startStreamWrap3 = function () {
+        // -loglevel info quiet debug 日志等级
+        var ffmpeg = spawn('ffmpeg', ['-loglevel', 'debug', '-stimeout', '30000000', '-probesize', '64', '-analyzeduration', '100000', '-reorder_queue_size', '5', '-rtsp_transport', 'tcp', '-i', this.config.channelUrl, '-an', '-c:v', 'copy', '-f', 'mp4', '-movflags', '+frag_keyframe+empty_moov+default_base_moof', '-metadata', 'title="ip 216.4.116.29"', '-reset_timestamps', '1', 'pipe:1'], 
+        // {stdio: ['ignore', 'pipe', 'pipe'], cwd: process.cwd()}
+        { stdio: ['ignore', 'pipe', 'pipe'], cwd: process.cwd() });
+        // 注册错误
+        ffmpeg.stderr.on('data', function (data) {
+            var error = data.toString();
+            console.log('ffmpeg stderr: ', error);
+        });
+        ffmpeg.stdio[1].pipe(this.mp4frag);
+    };
+    /**
+     * 获取mp4frag
+     */
+    Channel.prototype.getMp4frag = function () {
+        return this.mp4frag;
     };
     return Channel;
 }());
