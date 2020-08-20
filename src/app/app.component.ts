@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
 import { ElectronService } from './services/electron.service';
-
-import io from 'socket.io-client';
-
+// import io from 'socket.io-client';
 declare var flvjs;
 
 @Component({
@@ -11,77 +9,76 @@ declare var flvjs;
     styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-    url: string;
-    socket: any;
-    flvPlayer: any;
+    url = 'rtsp://192.168.0.249/h264/ch1/main/av_stream';
+    player;
 
     constructor(private electronService: ElectronService) {
-        this.electronService.ipcRenderer.on('playOver', (e, message) => {
-            this.initVideo();
-        });
+
     }
 
-    connectClick() {
-        const img = document.getElementById('img');
-        const streamCanvas = document.getElementById('streamCanvas');
-        const streamCtx = streamCanvas['getContext']('2d');
+    play() {
+        let video = document.getElementById('video') as HTMLVideoElement;
+        let rtsp = this.url;
+        let player = this.player;
 
-        img.onload = () => {
-            URL.revokeObjectURL(img['src']);
-            streamCtx.drawImage(img, 0, 0, 720, 480);
-        };
-
-        this.socket = io('http://localhost:3000/socket');
-
-        this.socket.on('connect', () => {
-            this.socket.emit('msg', {
-                url: 'rtsp://admin:admin@192.168.0.233:554/h264/ch1/main/av_stream',
-                name: 'demo'
-            });
-        });
-        this.socket.on('msg', (data) => {
-            const arrayBuffer = new Uint8Array(data.body);
-            const blob = new Blob([arrayBuffer.buffer], { type: 'image/jpeg' });
-            const url = URL.createObjectURL(blob);
-            img['src'] = url;
-
-            // const reader = new FileReader();
-            // reader.readAsDataURL(blob);
-            // reader.onload = (e) => {
-            //     img['src'] = e.target['result'];
-            // };
-        });
-        this.socket.on('disconnect', () => {
-            console.log('disconnect');
-        });
-    }
-
-    closeClick() {
-        this.socket && this.socket.close();
-        this.socket = null;
-    }
-
-    connectMp4fragClick() {
-        // this.electronService.ipcRenderer.send('play', 'rtsp://admin:admin@192.168.0.233:554/h264/ch1/main/av_stream');
-        this.electronService.ipcRenderer.send('play', 'rtsp://192.168.31.51:554/stream=0');
-    }
-
-    closeMp4fragClick() {
-        this.flvPlayer && this.flvPlayer.destroy();
-        this.flvPlayer = null;
-    }
-
-    initVideo() {
-        if (flvjs.isSupported()) {
-            const videoElement = document.getElementById('videoElement');
-            this.flvPlayer = flvjs.createPlayer({
-                type: 'mp4',
-                isLive: true,
-                url: 'http://localhost:3000/mp4frag.mp4'
-            });
-            this.flvPlayer.attachMediaElement(videoElement);
-            this.flvPlayer.load();
-            this.flvPlayer.play();
+        if (player) {
+            destroy();
         }
+
+        function createPlayer() {
+            player = flvjs.createPlayer({
+                type: 'flv',
+                isLive: true,
+                url: 'http://localhost:8888/rtsp?url=' + rtsp + '&time=' + new Date().getTime()
+            }, {
+                enableWorker: false,
+                enableStashBuffer: false,
+                stashInitialSize: 128
+            });
+            player.attachMediaElement(video);
+            // 检测到报错后 可以重连
+            player.on(flvjs.Events.ERROR, function(errorType, errorDetail) {
+                setTimeout(function() {
+                    replay();
+                }, 10000);
+            });
+
+            try {
+                player.load();
+                player.play();
+
+                setTimeout(checkTime, 10 * 1000);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        function replay() {
+            destroy();
+            createPlayer();
+        }
+
+        function destroy() {
+            player.pause();
+            player.unload();
+            player.detachMediaElement();
+            player.destroy();
+            player = null;
+        }
+
+        function checkTime() {
+            let buffered = video.buffered;
+            if (buffered.length > 0) {
+                let end = buffered.end(0);
+                if (end - video.currentTime > 0.15) {
+                    video.currentTime = end - 0.08;
+                }
+            }
+
+            setTimeout(checkTime, 10 * 1000);
+        }
+
+        createPlayer();
+        this.player = player;
     }
 }

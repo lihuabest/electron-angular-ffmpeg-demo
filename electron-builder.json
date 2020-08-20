@@ -1,0 +1,34 @@
+{
+    "productName": "angular-electron",
+    "directories": {
+        "output": "release/"
+    },
+    "files": [
+        "**/*",
+        "!.vscode",
+        "!src/",
+        "!serve/",
+        "!.editorconfig",
+        "!browserslist",
+        "!package.json",
+        "!package-lock.json",
+        "!README.md",
+        "!gulpfile.js",
+        "!angular.json",
+        "!tsconfig.json",
+        "!tsconfig-serve.json",
+        "!tsconfig.app.json",
+        "!tsconfig.spec.json",
+        "!tslint.json"
+    ],
+    "nsis": {
+        "oneClick": false,
+        "allowToChangeInstallationDirectory": true
+    },
+    "win": {
+        "asar": true,
+        "asarUnpack": [
+            "libs/ffmpeg.exe"
+        ]
+    }
+}

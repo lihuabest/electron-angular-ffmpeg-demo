@@ -1,15 +1,5 @@
-<div class="container">
-    <div>
-        <button (click)="connectClick()">通信</button>
-        <button (click)="closeClick()">关闭通信</button>
-    </div>
-    <img id="img" style="width: 100px;height: 100px;display: none;">
-    <canvas id="streamCanvas" width="720" height="480"></canvas>
-
-    <div>
-        <button (click)="connectMp4fragClick()">通信Mp4frag</button>
-        <button (click)="closeMp4fragClick()">关闭通信Mp4frag</button>
-        <!-- <button (click)="closeClick()">关闭通信</button> -->
-    </div>
-    <video id="videoElement" width="720" height="480"></video>
+<div>
+    <input type="text" [(ngModel)]="url">
+    <button (click)="play()">播放</button>
 </div>
+<video class="demo-video" id="video" style="width: 800px;height: 500px;" muted="muted"></video>
