@@ -1,7 +1,6 @@
 import { EventEmitter } from 'events';
 import { spawn } from 'child_process';
-import * as path from 'path';
-import { app } from 'electron';
+import { getFile } from './tool';
 
 export class ChannelConfig {
     public channelId?: string;
@@ -25,21 +24,16 @@ export class Channel {
 
     public startStream(): void {
         // -stimeout 10000000 超时10秒
-        let ffmpegString = '-loglevel error -stimeout 10000000 -max_delay 500000 -buffer_size 102400 -i ' + this.config.channelUrl + ' -c:v copy -an -f flv pipe:1';
+        let ffmpegString = '';
         if (this.config.channelUrl.indexOf('rtsp://') > -1) {
-            ffmpegString = '-rtsp_transport tcp ' + ffmpegString;
+            ffmpegString = '-rtsp_transport tcp -loglevel error -stimeout 10000000 -max_delay 500000 -buffer_size 102400 -i ' + this.config.channelUrl + ' -c:v copy -an -f flv pipe:1';
         }
-
-        let rootDir = app.getAppPath();
-        let last = path.basename(rootDir);
-        if (last === 'app.asar') {
-            rootDir = path.join(app.getAppPath(), 'libs/ffmpeg.exe').replace('app.asar', 'app.asar.unpacked'); // 打包环境
-        } else {
-            rootDir = path.resolve('.', 'libs/ffmpeg.exe'); // 开发环境
+        if (this.config.channelUrl.indexOf('rtmp://') > -1) {
+            ffmpegString = '-loglevel error -i ' + this.config.channelUrl + ' -c:v copy -an -f flv pipe:1';
         }
 
         // 解码
-        this.ffmpeg = spawn(rootDir, ffmpegString.split(' '), { stdio: ['pipe', 'pipe', 'pipe', 'pipe', 'pipe'] });
+        this.ffmpeg = spawn(getFile('libs/ffmpeg.exe'), ffmpegString.split(' '), { stdio: ['pipe', 'pipe', 'pipe', 'pipe', 'pipe'] });
 
         // 关闭
         this.ffmpeg.on('close', () => {
@@ -49,8 +43,7 @@ export class Channel {
 
         // 报错
         this.ffmpeg.stderr.on('data', buffer => {
-            console.log('ffmpeg stderr url: ' + this.config.channelUrl);
-            console.log(buffer.toString());
+            console.log('ffmpeg output: ' + buffer.toString());
         });
 
         // 输出

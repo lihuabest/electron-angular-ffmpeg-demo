@@ -2,8 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var events_1 = require("events");
 var child_process_1 = require("child_process");
-var path = require("path");
-var electron_1 = require("electron");
+var tool_1 = require("./tool");
 var ChannelConfig = /** @class */ (function () {
     function ChannelConfig() {
     }
@@ -20,20 +19,15 @@ var Channel = /** @class */ (function () {
     Channel.prototype.startStream = function () {
         var _this = this;
         // -stimeout 10000000 超时10秒
-        var ffmpegString = '-loglevel error -stimeout 10000000 -max_delay 500000 -buffer_size 102400 -i ' + this.config.channelUrl + ' -c:v copy -an -f flv pipe:1';
+        var ffmpegString = '';
         if (this.config.channelUrl.indexOf('rtsp://') > -1) {
-            ffmpegString = '-rtsp_transport tcp ' + ffmpegString;
+            ffmpegString = '-rtsp_transport tcp -loglevel error -stimeout 10000000 -max_delay 500000 -buffer_size 102400 -i ' + this.config.channelUrl + ' -c:v copy -an -f flv pipe:1';
         }
-        var rootDir = electron_1.app.getAppPath();
-        var last = path.basename(rootDir);
-        if (last === 'app.asar') {
-            rootDir = path.join(electron_1.app.getAppPath(), 'libs/ffmpeg.exe').replace('app.asar', 'app.asar.unpacked'); // 打包环境
-        }
-        else {
-            rootDir = path.resolve('.', 'libs/ffmpeg.exe'); // 开发环境
+        if (this.config.channelUrl.indexOf('rtmp://') > -1) {
+            ffmpegString = '-loglevel error -i ' + this.config.channelUrl + ' -c:v copy -an -f flv pipe:1';
         }
         // 解码
-        this.ffmpeg = child_process_1.spawn(rootDir, ffmpegString.split(' '), { stdio: ['pipe', 'pipe', 'pipe', 'pipe', 'pipe'] });
+        this.ffmpeg = child_process_1.spawn(tool_1.getFile('libs/ffmpeg.exe'), ffmpegString.split(' '), { stdio: ['pipe', 'pipe', 'pipe', 'pipe', 'pipe'] });
         // 关闭
         this.ffmpeg.on('close', function () {
             console.log('ffmpeg close url: ' + _this.config.channelUrl);
@@ -41,8 +35,7 @@ var Channel = /** @class */ (function () {
         });
         // 报错
         this.ffmpeg.stderr.on('data', function (buffer) {
-            console.log('ffmpeg stderr url: ' + _this.config.channelUrl);
-            console.log(buffer.toString());
+            console.log('ffmpeg output: ' + buffer.toString());
         });
         // 输出
         this.ffmpeg.stdio[1].on('data', function (buffer) {

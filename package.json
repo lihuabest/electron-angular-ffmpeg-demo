@@ -14,10 +14,10 @@
     "build-ng": "ng build --aot --prod --base-href ./",
     "build:dev": "npm run build -- -c dev",
     "build:prod": "npm run build",
-    "electron:local": "npm run build:prod && electron .",
-    "electron:linux": "npm run build:prod && electron-builder build --linux",
-    "electron:windows": "npm run build:prod && electron-builder build --windows",
-    "electron:mac": "npm run build:prod && electron-builder build --mac"
+    "build:local": "npm run build:prod && electron .",
+    "build:linux": "npm run build:prod && electron-builder build --linux",
+    "build:win": "npm run build:prod && electron-builder build --windows",
+    "build:mac": "npm run build:prod && electron-builder build --mac"
   },
   "author": "lihua",
   "license": "ISC",
@@ -53,7 +53,7 @@
     "@types/node": "^12.7.5",
     "@types/socket.io": "^2.1.2",
     "codelyzer": "^5.0.0",
-    "electron": "^6.0.9",
+    "electron": "^8.2.0",
     "electron-builder": "^22.8.0",
     "gulp": "^4.0.2",
     "gulp-watch": "^5.0.1",

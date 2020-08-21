@@ -1,5 +1,17 @@
 <div>
-    <input type="text" [(ngModel)]="url">
-    <button (click)="play()">播放</button>
+    <p>rtsp://192.168.0.249/h264/ch1/main/av_stream</p>
+    <p>rtsp://admin:admin@192.168.0.234:554/h264/ch1/main/av_stream</p>
+    <p>rtsp://admin:admin@192.168.0.233:554/h264/ch1/main/av_stream</p>
+    <p>rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov</p>
+    <p>rtmp://58.200.131.2:1935/livetv/gxtv</p>
 </div>
-<video class="demo-video" id="video" style="width: 800px;height: 500px;" muted="muted"></video>
+<div>
+    <button (click)="addClick()">添加播放组件</button>
+</div>
+<div *ngFor="let item of list" style="margin-top: 20px;">
+    <div>
+        <input type="text" [(ngModel)]="item.url">
+        <button (click)="play(item)" style="margin-left: 5px;">播放</button>
+    </div>
+    <video class="demo-video" [id]="item.id" style="width: 500px;height: 300px;" muted="muted"></video>
+</div>

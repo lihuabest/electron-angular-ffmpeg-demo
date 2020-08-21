@@ -10,16 +10,35 @@ declare var flvjs;
 })
 export class AppComponent {
     url = 'rtsp://192.168.0.249/h264/ch1/main/av_stream';
+    // url = 'rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov';
+    // url = 'rtmp://58.200.131.2:1935/livetv/gxtv';
     player;
 
-    constructor(private electronService: ElectronService) {
+    list = [];
 
+    constructor(private electronService: ElectronService) {
+        this.addClick();
     }
 
-    play() {
-        let video = document.getElementById('video') as HTMLVideoElement;
-        let rtsp = this.url;
-        let player = this.player;
+    /**
+     * 添加播放组件
+     */
+    addClick() {
+        this.list.push({
+            player: null,
+            url: null,
+            id: new Date().getTime()
+        });
+    }
+
+    /**
+     * 播放
+     */
+    play(item) {
+        let video = document.getElementById(item.id) as HTMLVideoElement;
+        let rtsp = item.url;
+        let player = item.player;
+        let port = this.electronService.localServerPort;
 
         if (player) {
             destroy();
@@ -29,18 +48,25 @@ export class AppComponent {
             player = flvjs.createPlayer({
                 type: 'flv',
                 isLive: true,
-                url: 'http://localhost:8888/rtsp?url=' + rtsp + '&time=' + new Date().getTime()
+                url: 'http://localhost:' + port + '/rtsp?url=' + encodeURIComponent(rtsp) + '&time=' + new Date().getTime()
             }, {
                 enableWorker: false,
                 enableStashBuffer: false,
                 stashInitialSize: 128
             });
             player.attachMediaElement(video);
+
             // 检测到报错后 可以重连
-            player.on(flvjs.Events.ERROR, function(errorType, errorDetail) {
-                setTimeout(function() {
-                    replay();
-                }, 10000);
+            flvjs.LoggingControl.addLogListener((res, desc) => {
+                if (desc === '[MSEController] > MediaSource onSourceEnded' || desc === '[IOController] > Loader error, code = 403, msg = Forbidden') {
+                    setTimeout(() => {
+                        if (player) {
+                            player.unload();
+                            player.load();
+                            player.play();
+                        }
+                    }, 5 * 1000);
+                }
             });
 
             try {
@@ -79,6 +105,6 @@ export class AppComponent {
         }
 
         createPlayer();
-        this.player = player;
+        item.player = player;
     }
 }

@@ -3,14 +3,10 @@ import * as expressWebSocket from 'express-ws';
 import { Channel, ChannelConfig } from './channel';
 import * as path from 'path';
 
-const CONFIG = {
-    port: 8888
-};
-
 let Channels: Channel[] = [];
 
 // 开启服务
-export function createServer() {
+export function createServer(port) {
     let appBase = express();
     let { app } = expressWebSocket(appBase);
 
@@ -30,8 +26,8 @@ export function createServer() {
     app.get('/', (req, res) => {
         res.sendFile(path.resolve(__dirname, '../index.html'));
     });
-    app.listen(CONFIG.port);
-    console.log('express server start at http://localhost:' + CONFIG.port);
+    app.listen(port);
+    console.log('express server start at http://localhost:' + port);
 }
 
 // ws处理rtsp服务
@@ -94,7 +90,7 @@ function httpRequestHandle(req, res) {
         channel.emitter.removeListener('data', writeStream);
         channel.emitter.removeListener('close', closeStream);
 
-        res.end();
+        res.status(403).end();
     };
     channel.emitter.on('close', closeStream);
 

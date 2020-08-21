@@ -16,6 +16,9 @@ export class ElectronService {
     childProcess: typeof childProcess;
     fs: typeof fs;
 
+    httpProxyServer: string;
+    localServerPort: string;
+
     get isElectron() {
         return window && window.process && window.process.type;
     }
@@ -29,6 +32,9 @@ export class ElectronService {
 
             this.childProcess = window.require('child_process');
             this.fs = window.require('fs');
+
+            this.httpProxyServer = localStorage.getItem('httpProxyServer');
+            this.localServerPort = localStorage.getItem('localServerPort');
         }
     }
 }

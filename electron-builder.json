@@ -28,7 +28,8 @@
     "win": {
         "asar": true,
         "asarUnpack": [
-            "libs/ffmpeg.exe"
+            "libs/ffmpeg.exe",
+            "config/data.json"
         ]
     }
 }
