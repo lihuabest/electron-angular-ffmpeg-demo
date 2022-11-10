@@ -40,7 +40,7 @@
     "@types/node": "^12.7.5",
     "@types/socket.io": "^2.1.2",
     "codelyzer": "^5.0.0",
-    "electron": "^6.0.9",
+    "electron": "^18.3.7",
     "electron-connect": "^0.6.3",
     "express": "^4.17.1",
     "fluent-ffmpeg": "^2.1.2",
